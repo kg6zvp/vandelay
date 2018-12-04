@@ -22,7 +22,8 @@
     "build": "babel src --out-dir dist",
     "clean": "rimraf dist",
     "lint": "eslint src",
-    "test": "npm run-script lint && mocha --require babel-register --recursive --reporter spec"
+    "test": "npm run-script lint && mocha --require babel-register --recursive --reporter spec",
+    "test:debug": "npm run-script lint && mocha --inspect --require babel-register --recursive --reporter spec"
   },
   "resolutions": {
     "end-of-stream": "github:isaacs/end-of-stream#custom-stream-premature-close-fix"
@@ -179,7 +180,7 @@
     "camelcase": "^5.0.0",
     "continue-stream": "^3.0.0",
     "csv-parser": "^2.0.0",
-    "duplexify": "^3.6.0",
+    "duplexify": "^3.6.1",
     "end-of-stream": "github:isaacs/end-of-stream#custom-stream-premature-close-fix",
     "exceljs-transform-stream": "^1.0.0",
     "get-stream": "^4.0.0",

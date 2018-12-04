@@ -75,9 +75,23 @@ const fetchStream = (source, opt={}, raw=false) => {
       cb(null, row)
     }
 
+    const TextDecoder = require('util').TextDecoder
+    
+    let fromReqCount = 0
+    let fromParserCount = 0
     let req = fetchURL(url, opt)
     if (opt.onFetch) opt.onFetch(url)
-    const out = pumpify.obj(req, src.parser(), through2.obj(map))
+    const out = pumpify.obj(req,
+      through2.obj((chunk, encoding, cb) => {
+        fromReqCount++
+        console.log('from req:', fromReqCount, 'chunk:', new TextDecoder(encoding).decode(chunk))
+        cb(null, chunk)
+      }), src.parser(),
+      through2.obj((chunk, encoding, cb) => {
+        fromParserCount++
+        console.log('from parser:', fromParserCount)
+        cb(null, chunk)
+      }), through2.obj(map))
     out.abort = () => {
       req.abort()
       hardClose(out)

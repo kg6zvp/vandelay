@@ -7,6 +7,11 @@ import getPort from 'get-port'
 import fetch from '../../src/fetch'
 import parse from '../../src/parse'
 
+import got from 'got'
+import pumpify from 'pumpify'
+import through2 from 'through2'
+import JSONStream from 'JSONStream'
+
 let port, app, server
 const sample = [
   { a: 1, b: 2, c: 3 },
@@ -202,13 +207,25 @@ describe('fetch', () => {
   it('should handle stream closes properly, and not continue when not supported', async () => {
     const source = {
       // will close the stream after 1000 items
-      url: `http://localhost:${port}/infinite?close=1000`,
+      url: `http://localhost:${port}/infinite?close=1298`, // seems to fail around 1297 or so ??
       parser: 'json',
       parserOptions: { selector: '*.a' }
     }
     const stream = fetch(source)
     const res = await collect.array(stream)
-    res.length.should.equal(1000)
+    res.length.should.equal(1298)
+  })
+  it('should handle stream closes without fetchURL', async () => {
+    const source = {
+      // will close the stream after 1000 items
+      url: `http://localhost:${port}/infinite?close=10000`,
+      parser: 'json',
+      parserOptions: { selector: '*.a' }
+    }
+    const gotStream = got.stream(source.url, { attempts: 10, buffer: false, followRedirects: true })
+    const stream = pumpify.obj(gotStream, JSONStream.parse(source.parserOptions.selector)) //fetch(source)
+    const res = await collect.array(stream)
+    res.length.should.equal(10000)
   })
   it('should emit 404 http errors', (done) => {
     const stream = fetch({
